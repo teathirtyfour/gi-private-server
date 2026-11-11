@@ -130,8 +130,11 @@ def protect_shared_assets(client, *, expected=None):
     try:
         if source is not None and os.name == 'nt':
             assets = source / SHARED_ASSETS
-            # Pin directories too, preventing an updater from renaming the tree.
-            for path in [source, source / 'GenshinImpact_Data', assets, *assets.rglob('*')]:
+            # Each hard-link name needs a handle to prevent POSIX-style unlink
+            # on Windows. Pin both trees while keeping private overlays writable.
+            private_assets = client / SHARED_ASSETS
+            for path in [source, source / 'GenshinImpact_Data', assets, *assets.rglob('*'),
+                         private_assets, *private_assets.rglob('*')]:
                 handle = create(str(path), 0x80000000, 1, ctypes.byref(attributes), 3,
                                 0x02000000 if path.is_dir() else 0, None)
                 if handle == wintypes.HANDLE(-1).value:

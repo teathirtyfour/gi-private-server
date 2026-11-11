@@ -272,7 +272,7 @@ def prepare(base, current, output, recipe_path=RECIPE):
         if output.exists() or output.is_symlink():
             raise ValueError('Output appeared while preparing; refusing to replace it')
         stage.rename(output)
-    return output
+    return output.resolve(strict=True)
 
 
 def main():
