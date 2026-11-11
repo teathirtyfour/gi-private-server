@@ -1,0 +1,102 @@
+name: Source checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  patch:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14.10'
+      - name: Install pinned patch compiler
+        shell: bash
+        run: |
+          curl -fL --retry 3 https://github.com/mstorsjo/llvm-mingw/releases/download/20261104/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64.tar.xz -o "$RUNNER_TEMP/llvm-mingw.tar.xz"
+          printf '%s  %s\n' 919380403de87dca3c581c2053230cd298af5e891286628ba0613b7fed370926 "$RUNNER_TEMP/llvm-mingw.tar.xz" | sha256sum -c -
+          tar -xf "$RUNNER_TEMP/llvm-mingw.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/llvm-mingw-20261104-ucrt-ubuntu-22.04-x86_64/bin" >> "$GITHUB_PATH"
+          rustup toolchain install 1.99.1 --profile minimal --target x86_64-pc-windows-gnullvm
+          rustup default 1.99.1
+      - name: Build the canonical patch and matching dependency source
+        env:
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: x86_64-w64-mingw32-clang
+        run: |
+          python distribution/build.py patch
+          cargo vendor --manifest-path vendor/hk4e-patch-universal/Cargo.toml --locked --versioned-dirs out/patch-dependencies
+          mkdir -p out/ci-patch
+          python distribution/vendor_patch_sources.py --vendor out/patch-dependencies --lock vendor/hk4e-patch-universal/Cargo.lock --output out/ci-patch/dependencies.tar.gz
+          python -c "import glob,json,shutil; a=json.load(open(glob.glob('out/builds/patch/*/artifact.json')[0])); shutil.copyfile(a['path'],'out/ci-patch/Astrolabe.dll')"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: patch-and-dependency-source
+          path: out/ci-patch/
+          if-no-files-found: error
+          retention-days: 14
+  launchers:
+    needs: patch
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14.10'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: patch-and-dependency-source
+          path: out/ci-patch
+      - name: Install Linux runtime and GUI dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb bubblewrap
+      - run: python -m pip install -r distribution/requirements-build.txt
+      - name: Package the same source and patch used by development
+        shell: bash
+        run: |
+          patch_sha=$(python -c "import hashlib; print(hashlib.file_digest(open('out/ci-patch/Astrolabe.dll','rb'),'sha256').hexdigest())")
+          python distribution/build_launcher.py --patch out/ci-patch/Astrolabe.dll --patch-sha256 "$patch_sha" --patch-dependency-archive out/ci-patch/dependencies.tar.gz --output out/launcher --frozen
+      - name: Smoke-test Linux package without launching a game
+        if: runner.os == 'Linux'
+        run: xvfb-run -a out/launcher/PrivateServerLauncher --self-test-ui out/launcher-ui.json
+      - name: Smoke-test Windows package without launching a game
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process out/launcher/PrivateServerLauncher.exe -ArgumentList '--self-test-ui', 'out/launcher-ui.json' -Wait -PassThru
+          if ($p.ExitCode -ne 0 -or !(Test-Path out/launcher-ui.json)) { throw 'Launcher smoke test failed' }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: launcher-${{ matrix.os }}
+          path: |
+            out/launcher/
+            out/launcher-ui.json
+          if-no-files-found: error
+          retention-days: 14
+  python:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14.10'
+      - name: Install Linux GUI test dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb bubblewrap
+      - name: Python and real GUI fixture checks on Linux
+        if: runner.os == 'Linux'
+        env:
+          PRIVATE_LAUNCHER_UI_TEST: '1'
+          PYTHONPATH: tests
+        run: xvfb-run -a python -W error::ResourceWarning -m unittest discover -s tests -p 'test_*.py'
+      - name: Python and real GUI fixture checks on Windows
+        if: runner.os == 'Windows'
+        env:
+          PRIVATE_LAUNCHER_UI_TEST: '1'
+          PYTHONPATH: tests
+        run: python -W error::ResourceWarning -m unittest discover -s tests -p 'test_*.py'

@@ -1,0 +1,14 @@
+/out/
+/runtime/
+/deployments/
+.resource-downloads/
+.env
+.env.*
+**/__pycache__/
+**/target/
+**/.private-launcher/
+**/GenshinImpact_Data/
+*.log
+*.dll
+*.exe
+*.jar
