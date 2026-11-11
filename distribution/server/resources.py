@@ -36,6 +36,7 @@ def write(path, value):
 
 
 def member(root, name):
+    root = Path(root).resolve(strict=True)
     relative = PurePosixPath(name)
     if relative.is_absolute() or not relative.parts or '..' in relative.parts or '\\' in name:
         raise ValueError('Unsafe resource path: ' + name)

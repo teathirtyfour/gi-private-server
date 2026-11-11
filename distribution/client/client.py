@@ -72,6 +72,7 @@ def link_assets(source, target):
 
 
 def shared_source(client, *, expected=None):
+    client = Path(client).resolve(strict=True)
     state = client / '.private-launcher/shared-assets.json'
     if not state.exists():
         assets = client / SHARED_ASSETS
@@ -245,6 +246,7 @@ def check_server(url, *, opener=None):
 
 
 def checked_file(root, relative):
+    root = Path(root).resolve(strict=True)
     path = root / relative
     if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(root):
         raise ValueError(f'Missing or redirected client file: {relative}')
@@ -438,6 +440,7 @@ def adopt_shared(source, client, patch_sha256, *, expected=None):
 
 @contextmanager
 def client_lock(client):
+    client = Path(client).resolve(strict=True)
     state = client / '.private-launcher'
     if state.is_symlink() or not state.is_dir() or not state.resolve().is_relative_to(client):
         raise ValueError('Private launcher state is missing or redirected')

@@ -1,9 +1,16 @@
 # Build the launcher
 
+Keep checkout file bytes unchanged on Windows. The public checkout includes
+`.gitattributes` to preserve the checksums used across both build platforms.
+
 The launcher build takes two inputs, `Astrolabe.dll` and the corresponding
 `dependencies.tar.gz`. Build the patch once and use those same inputs for both
 platforms. PyInstaller packages the Linux executable on Linux and the Windows
 executable on Windows.
+
+Player downloads are available from the
+[latest release](https://github.com/teathirtyfour/gi-private-server/releases/latest).
+Extract the whole platform archive before opening the launcher.
 
 ## Build both packages with GitHub Actions
 

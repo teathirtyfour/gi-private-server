@@ -40,7 +40,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_shared_preparation_omits_asset_copy_and_detects_source_update(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected, storage='shared')
             self.assertTrue(os.path.samefile(source / client.SHARED_ASSETS / 'bundle.blk',
@@ -57,7 +57,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_missing_shared_protection_record_blocks_launch(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected, storage='shared')
             (dest / '.private-launcher/shared-assets.json').unlink()
@@ -66,7 +66,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_shared_space_estimate_excludes_assets_and_keeps_persistent_private(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             persistent = source / 'GenshinImpact_Data/Persistent'
             persistent.mkdir(); (persistent / 'cache').write_bytes(b'private writable cache')
@@ -85,7 +85,7 @@ class PortableClientTest(unittest.TestCase):
     def test_adopt_legacy_client_preserves_settings_and_detaches_writable_files(self):
         import shutil
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             before = {p.relative_to(source).as_posix(): p.read_bytes() for p in source.rglob('*') if p.is_file()}
             dest = root / 'legacy'
@@ -116,7 +116,7 @@ class PortableClientTest(unittest.TestCase):
         import subprocess
         import sys
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected, storage='shared')
             real_run = subprocess.run
@@ -140,7 +140,7 @@ class PortableClientTest(unittest.TestCase):
     def test_shared_assets_work_across_filesystems_without_copying(self):
         with tempfile.TemporaryDirectory(dir='/dev/shm') as original, tempfile.TemporaryDirectory() as directory:
             source, dll, sha, expected = self.shared_fixture(Path(original))
-            root = Path(directory)
+            root = Path(directory).resolve()
             if source.stat().st_dev == root.stat().st_dev:
                 self.skipTest('Two different mounted filesystems are required')
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected, storage='shared')
@@ -151,7 +151,7 @@ class PortableClientTest(unittest.TestCase):
     @unittest.skipUnless(os.name == 'nt', 'Windows sharing-mode integration')
     def test_shared_windows_guard_denies_writes_and_deletion_then_releases(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             source, dll, sha, expected = self.shared_fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected, storage='shared')
             path = dest / client.SHARED_ASSETS / 'bundle.blk'
@@ -168,7 +168,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_private_copy_has_independent_files_without_normal_login(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             before = {str(p.relative_to(source)): p.read_bytes() for p in source.rglob('*') if p.is_file()}
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected)
             self.assertEqual(dest, client.verify_private(dest, sha, expected=expected))
@@ -181,7 +181,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_existing_destination_and_patch_corruption_do_not_touch_source(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             with self.assertRaisesRegex(ValueError, 'already exists'):
                 client.prepare(source, source, dll, sha, expected=expected)
             with self.assertRaisesRegex(ValueError, 'checksum'):
@@ -191,7 +191,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_normal_install_can_lack_root_patch_and_be_read_only(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             (source / 'Astrolabe.dll').unlink()
             if os.name != 'nt':
                 for path in source.rglob('*'):
@@ -209,7 +209,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_patch_update_and_restore_keep_game_files_login_and_original_backups(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             destination = client.prepare(source, root / 'private', dll, sha, expected=expected)
             next_patch = root / 'next.dll'; next_patch.write_bytes(b'next private patch')
             next_sha = client.digest(next_patch)
@@ -223,7 +223,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_interrupted_two_file_patch_change_blocks_play_and_can_be_recovered(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             destination = client.prepare(source, root / 'private', dll, sha, expected=expected)
             next_patch = root / 'next.dll'; next_patch.write_bytes(b'next private patch')
             real_copy = client.atomic_copy
@@ -247,7 +247,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_updates_cannot_change_a_running_clients_patch(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             destination = client.prepare(source, root / 'private', dll, sha, expected=expected)
             with client.client_lock(destination):
                 with self.assertRaisesRegex(ValueError, 'already running'):
@@ -257,7 +257,7 @@ class PortableClientTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'Linux frozen-library environment check')
     def test_frozen_launcher_restores_system_libraries_and_uses_its_own_wine_settings(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             destination = client.prepare(source, root / 'private', dll, sha, expected=expected)
             inherited = {'LD_LIBRARY_PATH': '/frozen/libraries', 'LD_LIBRARY_PATH_ORIG': '/system/libraries',
                          'WINEDLLPATH': '/other/game', 'WINESERVER': '/other/wineserver',
@@ -276,7 +276,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_directory_picker_empty_folder_is_accepted_but_racing_files_are_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             destination = root / 'private'; destination.mkdir()
             client.prepare(source, destination, dll, sha, expected=expected)
             client.verify_private(destination, sha, expected=expected)
@@ -289,7 +289,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_cancelled_copy_leaves_no_partial_installation(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             def cancel(done, total):
                 raise client.CopyCancelled('cancelled')
             with self.assertRaises(client.CopyCancelled):
@@ -301,7 +301,7 @@ class PortableClientTest(unittest.TestCase):
     @unittest.skipIf(os.name == 'nt', 'Requires symlink creation privileges on Windows')
     def test_source_links_and_private_patch_hardlinks_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             (source / 'external-link').symlink_to(dll)
             with self.assertRaisesRegex(ValueError, 'contains a link'):
                 client.prepare(source, root / 'private', dll, sha, expected=expected)
@@ -313,7 +313,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_unsupported_client_and_racing_update_leave_no_private_copy(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             with self.assertRaisesRegex(ValueError, 'Unsupported'):
                 client.prepare(source, root / 'private', dll, sha, expected={'GenshinImpact.exe': '0' * 64})
             changed = False
@@ -330,7 +330,7 @@ class PortableClientTest(unittest.TestCase):
 
     def test_launch_uses_private_prefix_and_endpoint_and_resets_only_private_login(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected)
             cache = dest / 'GenshinImpact_Data/SDKCaches/HoYoPass'
             cache.mkdir(parents=True); (cache / 'session').write_bytes(b'private session')
@@ -348,7 +348,7 @@ class PortableClientTest(unittest.TestCase):
     def test_duplicate_launch_does_not_reset_a_live_session(self):
         import fcntl
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory); source, dll, sha, expected = self.fixture(root)
+            root = Path(directory).resolve(); source, dll, sha, expected = self.fixture(root)
             dest = client.prepare(source, root / 'private', dll, sha, expected=expected)
             cache = dest / 'GenshinImpact_Data/SDKCaches/HoYoPass'
             cache.mkdir(parents=True); (cache / 'session').write_bytes(b'keep live session')

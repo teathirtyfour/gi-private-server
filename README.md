@@ -12,7 +12,11 @@ artwork, audio, and the server JAR are outside this distribution.
 
 ## Play
 
-Download the launcher for your platform, open it, and import the operator's
+Download the Windows `.zip` or Linux `.tar.gz` from the
+[latest release](https://github.com/teathirtyfour/gi-private-server/releases/latest).
+Extract the entire archive and keep its files together. Open
+`PrivateServerLauncher.exe` on Windows or `PrivateServerLauncher` on Linux,
+then import the operator's
 `player-server.json`. Select the folder containing `GenshinImpact.exe` and an
 empty folder for your private client. Prepare the client, test the connection,
 and press **Play**. Sign in with the account your operator supplies.

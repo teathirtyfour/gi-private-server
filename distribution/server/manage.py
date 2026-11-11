@@ -168,7 +168,7 @@ class Deployment:
                 shutil.copyfile(self.root / name, configuration / name)
             manifest = {'schema': 1, 'serverSha256': self.metadata['serverSha256'],
                         'created': datetime.now(timezone.utc).isoformat(),
-                        'files': {str(p.relative_to(stage)): checksum(p) for p in stage.rglob('*') if p.is_file()}}
+                        'files': {p.relative_to(stage).as_posix(): checksum(p) for p in stage.rglob('*') if p.is_file()}}
             (stage / 'backup.json').write_text(json.dumps(manifest, indent=2) + '\n')
             archive = stage / 'completed.tar.gz'
             with tarfile.open(archive, 'w:gz') as package:
@@ -215,8 +215,8 @@ class Deployment:
         manifest = json.loads((directory / 'backup.json').read_text())
         if manifest.get('schema') != 1:
             raise ValueError('Unsupported backup format')
-        files = {str(p.relative_to(directory)): checksum(p) for p in directory.rglob('*') if p.is_file() and p != directory / 'backup.json'}
-        if files != manifest['files'] or not (directory / 'database.archive.gz').is_file() or not (directory / 'data').is_dir():
+        files = {p.relative_to(directory).as_posix(): checksum(p) for p in directory.rglob('*') if p.is_file() and p != directory / 'backup.json'}
+        if files != {name.replace('\\', '/'): value for name, value in manifest['files'].items()} or not (directory / 'database.archive.gz').is_file() or not (directory / 'data').is_dir():
             raise ValueError('Backup content/hash verification failed')
         return manifest
 
