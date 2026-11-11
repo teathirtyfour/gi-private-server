@@ -10,6 +10,20 @@ deployment tools, and third-party notices. Players supply the game installation.
 Operators supply a compatible server JAR and prepared resources. Game files,
 artwork, audio, and the server JAR are outside this distribution.
 
+## Documentation
+
+The [documentation index](docs/README.md) links the complete player and operator
+manuals.
+
+| Guide | Covers |
+| --- | --- |
+| [Player launcher](docs/launcher.md) | Downloads, Windows/Linux setup, all launcher controls, login, and patch recovery |
+| [Linux Wine setup](docs/linux-wine.md) | Pinned DWProton runner, private prefix, Visual C++, DXVK, and launch settings |
+| [Server setup](docs/server-setup.md) | Required inputs, DNS/DDNS, ports, resources, first start, and player invitations |
+| [Server operations](docs/server-operations.md) | Accounts, logs, saved data, backups, restores, upgrades, and rollback |
+| [Storage and versions](docs/storage-and-versions.md) | Shared assets, full copies, filesystems, and preserving game 7.2 |
+| [Troubleshooting](docs/troubleshooting.md) | Preparation, connection, Wine, patch, and server recovery problems |
+
 ## Play
 
 Download the Windows `.zip` or Linux `.tar.gz` from the
@@ -23,9 +37,12 @@ and press **Play**. Sign in with the account your operator supplies.
 
 Shared storage reuses the installed assets. Keep the source installation at
 7.2.0 while sharing it. Choose full copy to keep an independent installation.
-Linux requires Wine and bubblewrap for shared mode. Windows uses file links on
+Linux setup uses the [documented DWProton and DXVK stack](docs/linux-wine.md),
+plus bubblewrap for shared mode. Windows uses file links on
 the same volume and requires Developer Mode for links across volumes. Keep the
 launcher open while playing.
+
+Follow the [complete player walkthrough](docs/launcher.md) for first-time setup.
 
 ## Deploy
 
@@ -47,6 +64,9 @@ HTTPS. MongoDB and management endpoints stay private. The console
 accepts `account create friend --password=CHOOSE_A_UNIQUE_PASSWORD`. Give players
 their account and `player-server.json`. Run `python3 manage.py --help` for backup,
 restore, upgrade, and rollback commands.
+
+Use the [server setup guide](docs/server-setup.md) for a complete deployment and
+the [operations manual](docs/server-operations.md) for ongoing administration.
 
 ## Build the launcher
 
