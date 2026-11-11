@@ -3,7 +3,7 @@
   "profile": "production",
   "files": {
     ".gitattributes": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
-    ".github/workflows/ci.yml": "1b525eb688432056bea434bd740e223240e5dc73d36f41c0db433573ad61a4d0",
+    ".github/workflows/ci.yml": "b2547fc94bd42578b756d5eaa1698ac47b4901d5be712fad259b37b1577f4495",
     ".gitignore": "0c758b8864ac751b7169fa5a7bc90c7f0c39abd7a179f1bc8cefc732e626c2dc",
     "LICENSE": "494a5c202135ce259efd8156af2cb241c9d00db5c43d4699701623989a624911",
     "README.md": "e5e965c3fef4aed29b0415da7078531168509e84287dd292e34ac59939450b9c",
