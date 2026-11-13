@@ -12,3 +12,4 @@
 *.dll
 *.exe
 *.jar
+!/server.jar

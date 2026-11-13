@@ -13,7 +13,7 @@ You start the services explicitly after preparation.
 | Git | Used to obtain this repository and by the resource downloader |
 | Container engine | Docker with Compose, or Podman with a working Compose provider |
 | Public hostname | A DNS or DDNS name resolving to your reachable host |
-| Game server | A compatible 7.2 Java server JAR with strict password authentication |
+| Game server | Prebuilt 7.2 `server.jar` included at the repository root (or another compatible 7.2 JAR with strict password authentication) |
 | Server resources | A prepared resource directory or the optional pinned downloader |
 | Network | Inbound TCP 80 and 443, and UDP 22101 by default |
 
@@ -27,19 +27,16 @@ cache, the prepared deployment resources, database volumes, and backups. Existin
 resource directories are copied into the deployment. Choose locations with
 enough room for those copies.
 
-### Obtain the server JAR
+### Server JAR
 
-The public repository supplies launcher and deployment tools. Obtain a compatible
-Java server build separately from your server maintainer. The setup tool checks
-that the JAR contains
+The `production` branch includes the prebuilt `server.jar` at the repository
+root (`$HOME/gi-private-server/server.jar`) with strict password
+authentication and `/api/status` management support.
+
+If you pass a custom JAR instead, the setup tool checks that it contains
 `emu/grasscutter/auth/StrictPasswordAuthenticator.class`. Passing this check
-identifies authentication support. Compatibility with the protocol, resource
-recipe, and management endpoints still depends on the supplied server build.
-
-The management tool expects the game's internal `/api/status` response to contain
-a healthy game-tick record. A different implementation may require integration
-changes even if it passes the JAR check. Ask the server maintainer for the JAR
-and prepared resources intended for these deployment tools.
+identifies authentication support; compatibility with the protocol, resource
+recipe, and `/api/status` management endpoint still depends on that build.
 
 ## Configure DNS and networking
 
@@ -130,14 +127,15 @@ For another attempt, inspect the earlier output and choose a new destination.
 
 ### Option A — use prepared resources
 
-Use this path when your server maintainer supplies a compatible prepared resource
-directory. Replace the JAR and resource paths with their actual locations.
+Use this path when you already have a compatible prepared resource directory.
+Pass `server.jar` from the repository root (or replace the path if using a
+custom JAR) and your resource path.
 
 ```bash
 cd "$HOME/gi-private-server"
 python3 distribution/server/setup.py \
   --domain play.example.org \
-  --jar /path/to/server.jar \
+  --jar server.jar \
   --resources /path/to/prepared-resources \
   --output "$HOME/private-server-deployment"
 ```
@@ -152,13 +150,13 @@ match the chosen server and game version.
 The optional downloader obtains the repositories pinned in
 `distribution/server/resources-recipe.json`, prepares the resource layout, and
 verifies generated outputs. Use inputs you have permission to obtain and use.
-The server JAR is still supplied separately.
+Pass `server.jar` from the repository root.
 
 ```bash
 cd "$HOME/gi-private-server"
 python3 distribution/server/setup.py \
   --domain play.example.org \
-  --jar /path/to/server.jar \
+  --jar server.jar \
   --download-resources \
   --resource-cache "$HOME/private-server-resource-cache" \
   --output "$HOME/private-server-deployment"

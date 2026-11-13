@@ -23,11 +23,10 @@ and a private-server account. The launcher bundles its Python runtime and client
 patch. A player can use the release without installing Python or compiling code.
 
 Server operators need a Linux host, Python 3.11 or newer, Git, and Docker with
-Compose or Podman with a Compose provider. Operators also supply a compatible
-7.2 server JAR and either prepared server resources or inputs obtained through
-the optional pinned resource downloader. The public repository and launcher
-release contain the launcher, patch source, and deployment tools. Obtain the
-Java server JAR separately from whoever maintains your server implementation.
+Compose or Podman with a Compose provider, plus either prepared server resources
+or inputs obtained through the optional pinned resource downloader. The public
+repository includes the prebuilt 7.2 `server.jar`, launcher and patch source,
+and deployment tools.
 
 The public deployment generator requires a DNS or DDNS hostname for HTTPS login.
 It accepts a separate hostname or IPv4 address for the UDP game connection.
@@ -45,7 +44,7 @@ It accepts a separate hostname or IPv4 address for the UDP game connection.
 
 ### Hosting a server
 
-1. Obtain a compatible server JAR and prepare your host and hostname.
+1. Clone the repository (which includes `server.jar`) and prepare your host and hostname.
 2. Follow [Server setup](server-setup.md) to generate and start a deployment.
 3. Create player accounts through the server console.
 4. Give each player their account and the generated `player-server.json`.

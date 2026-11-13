@@ -6,9 +6,10 @@ servers. The launcher applies a client patch to a separate private installation.
 
 This project is unaffiliated with HoYoverse and COGNOSPHERE. Game and company
 names identify compatibility. The repository contains launcher and patch source,
-deployment tools, and third-party notices. Players supply the game installation.
-Operators supply a compatible server JAR and prepared resources. Game files,
-artwork, audio, and the server JAR are outside this distribution.
+deployment tools, the prebuilt `server.jar`, and third-party notices. Players
+supply the game installation. Operators supply a hostname and prepared resources
+(or inputs via the optional downloader). Game files, artwork, and audio are
+outside this distribution.
 
 ## Documentation
 
@@ -47,12 +48,12 @@ Follow the [complete player walkthrough](docs/launcher.md) for first-time setup.
 ## Deploy
 
 Use Python 3.11 or newer, Git, Docker with Compose or Podman with a Compose
-provider, and a DNS or DDNS hostname. Allow TCP 80/443 and UDP 22101. Supply a
-7.2 server JAR with strict authentication and a prepared resource directory you
-have permission to use.
+provider, and a DNS or DDNS hostname. Allow TCP 80/443 and UDP 22101. Use the
+included `server.jar` at the repository root and either a prepared resource
+directory you have permission to use or `--download-resources`.
 
 ```bash
-python3 distribution/server/setup.py --domain play.example.org --jar /path/to/server.jar --resources /path/to/prepared-resources --output ../deployment
+python3 distribution/server/setup.py --domain play.example.org --jar server.jar --resources /path/to/prepared-resources --output ../deployment
 cd ../deployment
 python3 manage.py start
 python3 manage.py console
