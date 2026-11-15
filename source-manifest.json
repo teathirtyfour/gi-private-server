@@ -93,7 +93,7 @@
     "docs/server-setup.md": "8667365437e17d2ec58abaf6e037d103ce3f3fed27565aa3ca928af2e2fbf2b8",
     "docs/storage-and-versions.md": "e6b9115592a4a4389851020148e6f6fb98418147c25abb4edd6345a541f54356",
     "docs/troubleshooting.md": "90bcd092d07ef59ffc261bae85f71e765b95472cad6dabc17f6f03f776c19f85",
-    "server.jar": "7463f9155e65d635ab9a18c105959f721d92faf9693afa36bcb5b80b7f078d22",
+    "server.jar": "edd01346ebd982be771ef6f84cfe85fa003a2cc444a4bb10683e0616bf10f67f",
     "tests/test_dependency_sources.py": "672b5879211c42310913ba66a06608b6b8b4f921da10e94fbea8df2bfa03dfb9",
     "tests/test_deployment_setup.py": "5d251e2bfa20c218e71ce6fe5f0627f12609d973ce223f5d231deebeaee9edaa",
     "tests/test_launcher_packaging.py": "a178eb5c85a5ef28d9ea8f86051b75c89a83c6980a11c0d98661d5f0848bdc7b",
